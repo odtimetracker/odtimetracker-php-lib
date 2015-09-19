@@ -1,0 +1,27 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"folder_exclude_patterns": [],
+			"follow_symlinks": false
+		}
+	],
+	"settings":
+	{
+		"tab_size": 4,
+		"translate_tabs_to_spaces": true
+	},
+	"build_systems":
+	[
+        {
+            "name": "Dump autoload",
+            "shell_cmd": "composer dumpautoload",
+            "working_dir": "${project_folder}"
+        },
+		{
+			"name": "PHPUnit",
+			"shell_cmd": "phpunit"
+		}
+	]
+}

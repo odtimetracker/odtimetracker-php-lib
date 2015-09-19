@@ -1,0 +1,31 @@
+{
+    "name": "odTimeTracker/odtimetracker-php-lib",
+    "description": "odTimeTracker PHP library.",
+    "homepage": "https://github.com/odTimeTracker/odtimetracker-php-lib",
+    "type": "library",
+    "license": "MPL-2.0",
+    "keywords": ["web service", "tools", "php-gtk"],
+    "authors": [
+        {
+            "name": "Ondřej Doněk",
+            "email": "ondrejd@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-0": {
+            "odTimeTracker\\": "src/"
+        },
+        "classmap": [
+            "./"
+        ]
+    },
+    "require": {
+        "php": ">=5.3",
+        "ext-date": "*",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "ext-pdo_sqlite": "*"
+    }
+}
