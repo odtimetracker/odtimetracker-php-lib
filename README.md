@@ -1,6 +1,6 @@
 # odTimeTracker PHP Library
 
-[![Build Status](https://travis-ci.org/ondrejd//odtimetracker-php-lib.svg)](https://travis-ci.org/ondrejd/odtimetracker-php-lib)
+[![Build Status](https://api.travis-ci.org/ondrejd/odtimetracker-php-lib.svg)](https://travis-ci.org/ondrejd/odtimetracker-php-lib)
 
 Is used by [odtimetracker-php-cgi](https://github.com/odTimeTracker/odtimetracker-php-cgi) and [odtimetracker-php-gtk](https://github.com/odTimeTracker/odtimetracker-php-gtk).
 
