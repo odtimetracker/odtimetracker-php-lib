@@ -3,7 +3,8 @@
 	[
 		{
 			"path": ".",
-			"folder_exclude_patterns": [],
+			"folder_exclude_patterns": ["vendor"],
+			"file_exclude_patterns": ["composer.lock"],
 			"follow_symlinks": false
 		}
 	],
