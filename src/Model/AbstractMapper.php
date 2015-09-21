@@ -31,13 +31,6 @@ abstract class AbstractMapper implements MapperInterface
 	} // end __construct(\PDO $pdo)
 
 	/**
-	 * Create schema.
-	 *
-	 * @return boolean
-	 */
-	abstract function createSchema();
-
-	/**
 	 * Select all records.
 	 *
 	 * @param integer $limit (Optional.)

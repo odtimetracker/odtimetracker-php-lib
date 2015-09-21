@@ -25,38 +25,6 @@ class ActivityMapper extends AbstractMapper
 	const PK_COL_NAME = 'ActivityId';
 
 	/**
-	 * Create schema.
-	 *
-	 * @return boolean
-	 */
-	function createSchema()
-	{
-		// We have to be sure that `Projects` table is created.
-		$projectsMapper = new ProjectMapper($this->pdo);
-		if ($projectMapper->createSchema() !== true) {
-			return false;
-		}
-
-		// Now we can create `Activities` table.
-		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
-CREATE TABLE IF NOT EXISTS $table (
-	ActivityId INTEGER PRIMARY KEY AUTOINCREMENT, 
-	ProjectId INTEGER NOT NULL,
-	Name TEXT,
-	Description TEXT,
-	Tags TEXT,
-	Started TEXT NOT NULL,
-	Stopped TEXT NOT NULL DEFAULT '',
-	FOREIGN KEY(ProjectId) REFERENCES Projects(ProjectId) 
-)
-EOD
-		);
-
-		return $stmt->execute();
-	} // end createSchema()
-
-	/**
 	 * Insert new record.
 	 *
 	 * @param EntityInterface $data

@@ -15,13 +15,6 @@ namespace odTimeTracker\Model;
 interface MapperInterface
 {
 	/**
-	 * Create schema.
-	 *
-	 * @return boolean
-	 */
-	public function createSchema();
-
-	/**
 	 * Select all records.
 	 *
 	 * @param integer $limit (Optional.)

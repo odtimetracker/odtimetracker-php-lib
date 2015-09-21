@@ -25,26 +25,6 @@ class ProjectMapper extends AbstractMapper
 	const PK_COL_NAME = 'ProjectId';
 
 	/**
-	 * Create schema.
-	 *
-	 * @return boolean
-	 */
-	function createSchema()
-	{
-		$table = self::TABLE_NAME;
-		$sql = <<<EOD
-CREATE TABLE IF NOT EXISTS `$table` (
-	ProjectId INTEGER PRIMARY KEY AUTOINCREMENT, 
-	Name TEXT,
-	Description TEXT,
-	Created TEXT NOT NULL
-);
-EOD;
-
-		return $this->pdo->prepare($sql)->execute();
-	} // end createSchema()
-
-	/**
 	 * Insert new record.
 	 *
 	 * @param EntityInterface $data
