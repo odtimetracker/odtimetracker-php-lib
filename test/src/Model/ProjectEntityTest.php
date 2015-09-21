@@ -5,115 +5,151 @@
  * @license Mozilla Public License 2.0 https://www.mozilla.org/MPL/2.0/
  * @author Ondřej Doněk, <ondrejd@gmail.com>
  */
-namespace odTimeTracker\Model;
 
-use PHPUnit_Framework_TestCase;
+namespace odTimeTrackerTest\Model;
 
-class ProjectEntityTest extends PHPUnit_Framework_TestCase
-{
-	private $_testData = array(
-		array(
-			'ProjectId' => 1,
-			'Name' => 'Project #1',
-			'Description' => 'Description of the first project.',
-			'Created' => '2015-07-29T13:10:00+01:00'
-		),
-		array(
-			'ProjectId' => 2,
-			'Name' => 'Project #2',
-			'Description' => 'Description of the second project.',
-			'Created' => '2015-07-29T13:30:00+01:00'
-		),
-		array(
-			'ProjectId' => 3,
-			'Name' => 'Project #3',
-			'Description' => 'Description of the third project.',
-			'Created' => '2015-08-01T07:10:00+01:00'
-		)
-	);
+/**
+ * @covers \odTimeTracker\Model\ProjectEntity
+ */
+class ProjectEntityTest extends \PHPUnit_Framework_TestCase {
+	/**
+	 * @var array $testProjects
+	 */
+	protected $testProjects;
 
-	public function testConstructWithNulls()
-	{
-		$entity = new ProjectEntity();
-		$this->assertNull($entity->getId());
-		$this->assertNull($entity->getProjectId(), '"ProjectId" should initially be null');
-		$this->assertNull($entity->getName(), '"Name" should initially be null');
-		$this->assertNull($entity->getDescription(), '"Description" should initially be null');
-		$this->assertNull($entity->getCreated(), '"Created" should initially be null');
+	protected function setUp() {
+		$this->testProjects = \TestData::getProjects();
 	}
 
-	public function testConstructWithValues()
-	{
-		foreach ($this->_testData as $data) {
-			$entity = new ProjectEntity($data);
+	protected function tearDown() {
+		parent::tearDown();
+	}
+
+	/**
+	 * @internal
+	 * @param mixed $datetime
+	 * @return mixed
+	 */
+	private function getDateTime($datetime) {
+		if (($datetime instanceof \DateTime)) {
+			return $datetime;
+		}
+
+		if (empty((string) $datetime)) {
+			return null;
+		}
+
+		return new \DateTime($datetime);
+	}
+
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::__construct
+	 */
+	public function testConstructWithNulls() {
+		$entity = new \odTimeTracker\Model\ProjectEntity();
+		$this->assertNull($entity->getId());
+		$this->assertNull($entity->getProjectId());
+		$this->assertNull($entity->getName());
+		$this->assertNull($entity->getDescription());
+		$this->assertNull($entity->getCreated());
+	}
+
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::__construct
+	 */
+	public function testConstructWithValues() {
+		foreach ($this->testProjects as $data) {
+			$entity = new \odTimeTracker\Model\ProjectEntity($data);
 			$this->assertEquals($data['ProjectId'], $entity->getId());
-			$this->assertEquals($data['ProjectId'], $entity->getProjectId(), '"ProjectId" was not set correctly');
-			$this->assertEquals($data['Name'], $entity->getName(), '"Name" was not set correctly');
-			$this->assertEquals($data['Description'], $entity->getDescription(), '"Description" was not set correctly');
-			$this->assertEquals(new \DateTime($data['Created']), $entity->getCreated(), '"Created" was not set correctly');
+			$this->assertEquals($data['ProjectId'], $entity->getProjectId());
+			$this->assertEquals($data['Name'], $entity->getName());
+			$this->assertEquals($data['Description'], $entity->getDescription());
+			
+			$this->assertEquals($this->getDateTime($data['Created']), $this->getDateTime($entity->getCreated()));
 		}
 	}
 
-	public function testExchangeArrayWithNulls()
-	{
-		foreach ($this->_testData as $data) {
-			$entity = new ProjectEntity();
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::exchangeArray
+	 */
+	public function testExchangeArrayWithNulls() {
+		foreach ($this->testProjects as $data) {
+			$entity = new \odTimeTracker\Model\ProjectEntity();
 			$entity->exchangeArray($data);
 			$entity->exchangeArray(array());
 			$this->assertNull($entity->getId());
-			$this->assertNull($entity->getProjectId(), '"ProjectId" should be null');
-			$this->assertNull($entity->getName(), '"Name" should be null');
-			$this->assertNull($entity->getDescription(), '"Description" should be null');
-			$this->assertNull($entity->getCreated(), '"Created" should be null');
+			$this->assertNull($entity->getProjectId());
+			$this->assertNull($entity->getName());
+			$this->assertNull($entity->getDescription());
+			$this->assertNull($entity->getCreated());
 		}
 	}
 
-	public function testExchangeArrayWithValues()
-	{
-		foreach ($this->_testData as $data) {
-			$entity = new ProjectEntity();
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::exchangeArray
+	 */
+	public function testExchangeArrayWithValues() {
+		foreach ($this->testProjects as $data) {
+			$entity = new \odTimeTracker\Model\ProjectEntity();
 			$entity->exchangeArray($data);
-			$this->assertEquals($data['ProjectId'], $entity->getProjectId(), '"ProjectId" was not set correctly');
-			$this->assertEquals($data['Name'], $entity->getName(), '"Name" was not set correctly');
-			$this->assertEquals($data['Description'], $entity->getDescription(), '"Description" was not set correctly');
-			$this->assertEquals(new \DateTime($data['Created']), $entity->getCreated(), '"Created" was not set correctly');
+			$this->assertEquals($data['ProjectId'], $entity->getProjectId());
+			$this->assertEquals($data['Name'], $entity->getName());
+			$this->assertEquals($data['Description'], $entity->getDescription());
+			$this->assertEquals($this->getDateTime($data['Created']), $this->getDateTime($entity->getCreated()));
 		}
 	}
 
-	public function testGetArrayCopyWithNulls()
-	{
-		$entity = new ProjectEntity();
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::getArrayCopy
+	 */
+	public function testGetArrayCopyWithNulls() {
+		$entity = new \odTimeTracker\Model\ProjectEntity();
 		$copy = $entity->getArrayCopy();
-		$this->assertNull($copy['ProjectId'], '"ProjectId" should initially be null');
-		$this->assertNull($copy['Name'], '"Name" should initially be null');
-		$this->assertNull($copy['Description'], '"Description" should initially be null');
-		$this->assertNull($copy['Created'], '"Created" should initially be null');
-		$this->assertNull($copy['CreatedFormatted'], '"CreatedFormatted" should initially be null');
+		$this->assertNull($copy['ProjectId']);
+		$this->assertNull($copy['Name']);
+		$this->assertNull($copy['Description']);
+		$this->assertNull($copy['Created']);
 	}
 
-	public function testGetArrayCopyWithValues()
-	{
-		foreach ($this->_testData as $data) {
-			$entity = new ProjectEntity($data);
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::getArrayCopy
+	 */
+	public function testGetArrayCopyWithValues() {
+		foreach ($this->testProjects as $data) {
+			$entity = new \odTimeTracker\Model\ProjectEntity($data);
 			$copy = $entity->getArrayCopy();
-			$this->assertEquals($data['ProjectId'], $copy['ProjectId'], '"ProjectId" was not set correctly');
-			$this->assertEquals($data['Name'], $copy['Name'], '"Name" was not set correctly');
-			$this->assertEquals($data['Description'], $copy['Description'], '"Description" was not set correctly');
-			$created = new \DateTime($data['Created']);
-			$this->assertEquals($created, $copy['Created'], '"Created" was not set correctly');
-			$this->assertEquals($created->format('j.n.Y G:i'), $copy['CreatedFormatted'], '"CreatedFormatted" was not set correctly');
+			$this->assertEquals($data['ProjectId'], $copy['ProjectId']);
+			$this->assertEquals($data['Name'], $copy['Name']);
+			$this->assertEquals($data['Description'], $copy['Description']);
+			$this->assertEquals($this->getDateTime($data['Created']), $this->getDateTime($copy['Created']));
 		}
 	}
 
-	public function testGetCreatedFormatted()
-	{
-		$project1 = new ProjectEntity($this->_testData[0]);
-		$this->assertEquals($project1->getCreatedFormatted(), '29.7.2015 13:10');
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::getCreatedFormatted
+	 */
+	public function testGetCreatedFormatted() {
+		$project1 = new \odTimeTracker\Model\ProjectEntity($this->testProjects[2]);
+		$this->assertNull($project1->getCreatedFormatted());
 
-		$project2 = new ProjectEntity($this->_testData[1]);
-		$this->assertEquals($project2->getCreatedFormatted(), '29.7.2015 13:30');
+		$project2 = new \odTimeTracker\Model\ProjectEntity($this->testProjects[3]);
+		$this->assertEquals('5.10.2011 10:00', $project2->getCreatedFormatted());
 
-		$project3 = new ProjectEntity($this->_testData[2]);
-		$this->assertEquals($project3->getCreatedFormatted(), '1.8.2015 7:10');
+		$project3 = new \odTimeTracker\Model\ProjectEntity($this->testProjects[4]);
+		$this->assertEquals('10.10.2011 10:00', $project3->getCreatedFormatted());
+	}
+
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::getCreatedRfc3339
+	 */
+	public function testGetCreatedRfc3339() {
+		$project1 = new \odTimeTracker\Model\ProjectEntity($this->testProjects[2]);
+		$this->assertNull($project1->getCreatedRfc3339());
+
+		$project2 = new \odTimeTracker\Model\ProjectEntity($this->testProjects[3]);
+		$this->assertEquals('2011-10-05T10:00:00+01:00', $project2->getCreatedRfc3339());
+
+		$project3 = new \odTimeTracker\Model\ProjectEntity($this->testProjects[4]);
+		$this->assertEquals('2011-10-10T10:00:00+01:00', $project3->getCreatedRfc3339());
 	}
 }

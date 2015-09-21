@@ -163,6 +163,16 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	} // end setActivityId($val)
 
 	/**
+	 * Retrieve entity of the project to which activity belongs.
+	 *
+	 * @return \odTimeTracker\Model\ProjectEntity|null
+	 */
+	public function getProject()
+	{
+		return $this->project;
+	} // end getProject()
+
+	/**
 	 * Retrieve identifier of activity's project.
 	 *
 	 * @return integer|null
@@ -277,8 +287,18 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	 */
 	public function getStartedFormatted()
 	{
-		return (is_null($this->started)) ? null : $this->started->format('j.n.Y G:i');
+		$started = $this->getStarted();
+		return (is_null($started)) ? null : $started->format('j.n.Y G:i');
 	} // end getStartedFormatted()
+
+	/**
+	 * @return string|null
+	 */
+	public function getStartedRfc3339()
+	{
+		$started = $this->getStarted();
+		return (is_null($started)) ? null : $started->format(\DateTime::RFC3339);
+	} // end getStartedRfc3339()
 
 	/**
 	 * Set date time when was the activity started.
@@ -318,8 +338,18 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	 */
 	public function getStoppedFormatted()
 	{
-		return (is_null($this->stopped)) ? null : $this->stopped->format('j.n.Y G:i');
+		$stopped = $this->getStopped();
+		return (is_null($stopped)) ? null : $stopped->format('j.n.Y G:i');
 	} // end getStoppedFormatted()
+
+	/**
+	 * @return string|null
+	 */
+	public function getStoppedRfc3339()
+	{
+		$stopped = $this->getStopped();
+		return (is_null($stopped)) ? null : $stopped->format(\DateTime::RFC3339);
+	} // end getStoppedRfc3339()
 
 	/**
 	 * Set date time when was the activity stopped.
@@ -341,16 +371,6 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 
 		return $this;
 	} // end setStopped($val)
-
-	/**
-	 * Retrieve entity of the project to which activity belongs.
-	 *
-	 * @return \odTimeTracker\Model\ProjectEntity|null
-	 */
-	public function getProject()
-	{
-		return $this->project;
-	} // end getProject()
 
 	/**
 	 * Retrieve duration between started and stopped. If stopped is `NULL`
@@ -434,4 +454,12 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 
 		return ($started->format('Y-m-d') === $stopped->format('Y-m-d'));
 	} // end isWithinOneDay()
+
+	/**
+	 * @return boolean
+	 */
+	public function isRunning()
+	{
+		return !empty($this->stopped);
+	} // end isRunning()
 } // End of ActivityEntity

@@ -178,6 +178,15 @@ class ProjectEntity implements \odTimeTracker\Model\EntityInterface
 	} // end getCreatedFormatted()
 
 	/**
+	 * @return string|null
+	 */
+	public function getCreatedRfc3339()
+	{
+		$created = $this->getCreated();
+		return (is_null($created)) ? null : $created->format(\DateTime::RFC3339);
+	} // end getCreatedRfc3339()
+
+	/**
 	 * Set date time when was the project created.
 	 *
 	 * @param DateTime|string $val Date time of creation.
