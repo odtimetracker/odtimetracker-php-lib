@@ -32,24 +32,24 @@ interface MapperInterface
 	/**
 	 * Insert new record.
 	 *
-	 * @param \odTimeTracker\Model\EntityInterface|array $data
-	 * @return \odTimeTracker\Model\EntityInterface|boolean Returns `FALSE` if anything goes wrong.
+	 * @param EntityInterface $data
+	 * @return mixed Returns `false` or {@see \odTimeTracker\Model\EntityInterface}.
 	 */
-	public function insert($entity);
+	public function insert(EntityInterface $entity);
 
 	/**
 	 * Update record.
 	 *
-	 * @param \odTimeTracker\Model\EntityInterface $entity
-	 * @return \odTimeTracker\Model\EntityInterface|boolean Returns `FALSE` if anything goes wrong.
+	 * @param EntityInterface $entity
+	 * @return boolean
 	 */
-	public function update($entity);
+	public function update(EntityInterface $entity);
 
 	/**
 	 * Delete record.
 	 *
-	 * @param \odTimeTracker\Model\EntityInterface|integer $entity
-	 * @return \odTimeTracker\Model\EntityInterface|boolean Returns `FALSE` if anything goes wrong.
+	 * @param EntityInterface $entity
+	 * @return boolean
 	 */
-	public function delete($entity);
-}
+	public function delete(EntityInterface $entity);
+} // End of MapperInterface

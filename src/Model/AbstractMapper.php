@@ -15,20 +15,20 @@ namespace odTimeTracker\Model;
 abstract class AbstractMapper implements MapperInterface
 {
 	/**
-	 * @var \Blog\Db\MyPdo $db
+	 * @var \PDO $pdo
 	 */
-	protected $db;
+	protected $pdo;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param \Blog\Db\MyPdo $db
+	 * @param \PDO $pdo
 	 * @return void
 	 */
-	public function __construct(\odTimeTracker\Db\MyPdo $db)
+	public function __construct(\PDO $pdo)
 	{
-		$this->db = $db;
-	} // end __construct(\odTimeTracker\Db\MyPdo $db)
+		$this->pdo = $pdo;
+	} // end __construct(\PDO $pdo)
 
 	/**
 	 * Create schema.
@@ -48,36 +48,41 @@ abstract class AbstractMapper implements MapperInterface
 	/**
 	 * Insert new record.
 	 *
-	 * @param \odTimeTracker\Model\EntityInterface|array $data
-	 * @return \odTimeTracker\Model\EntityInterface|boolean Returns `FALSE` if anything goes wrong.
+	 * @param EntityInterface $data
+	 * @return mixed Returns `false` or {@see \odTimeTracker\Model\EntityInterface}.
 	 */
-	abstract function insert($entity);
+	abstract function insert(EntityInterface $entity);
 
 	/**
 	 * Update record.
 	 *
-	 * @param \odTimeTracker\Model\EntityInterface $entity
-	 * @return \odTimeTracker\Model\EntityInterface|boolean Returns `FALSE` if anything goes wrong.
+	 * @param EntityInterface $entity
+	 * @return mixed Returns `false` or {@see \odTimeTracker\Model\EntityInterface}.
 	 */
-	abstract function update($entity);
+	abstract function update(EntityInterface $entity);
 
 	/**
 	 * Delete record.
 	 *
-	 * @param \odTimeTracker\Model\EntityInterface|integer $entity
-	 * @return \odTimeTracker\Model\EntityInterface|boolean Returns `FALSE` if anything goes wrong.
+	 * @param EntityInterface $entity
+	 * @return boolean
 	 */
-	function delete($entity)
+	public function delete(EntityInterface $entity)
 	{
-		$entityId = null;
+		return $this->deleteById($entity->getId());	
+	} // end delete(EntityInterface $entity)
 
-		if (is_numeric($entity)) {
-			$entityId = intval($entity);
-		} else if (($entity instanceof EntityInterface)) {
-			$entityId = $entity->getId();
-		}
+	/**
+	 * Delete record by its identifier.
+	 *
+	 * @param integer $id
+	 * @return boolean
+	 */
+	public function deleteById($id)
+	{
+		$entityId = intval($entity);
 
-		if (is_null($entityId) || is_int($entityId)) {
+		if ($entityId == 0) {
 			return false;
 		}
 
@@ -88,5 +93,7 @@ EOD
 		$stmt->bindParam(':table', self::TABLE_NAME);
 		$stmt->bindParam(':pkcolname', self::PK_COL_NAME);
 		$stmt->bindParam(':entityId', $entityId, \PDO::PARAM_INT);
-	} // end delete($entity)
+
+		return $stmt->execute();
+	} // end deleteById($id)
 } // End of AbstractMapper

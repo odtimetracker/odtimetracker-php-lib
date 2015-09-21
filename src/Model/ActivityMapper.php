@@ -31,10 +31,17 @@ class ActivityMapper extends AbstractMapper
 	 */
 	function createSchema()
 	{
+		// We have to be sure that `Projects` table is created.
+		$projectsMapper = new ProjectMapper($this->pdo);
+		if ($projectMapper->createSchema() !== true) {
+			return false;
+		}
+
+		// Now we can create `Activities` table.
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 CREATE TABLE IF NOT EXISTS $table (
-	ActivityId INTEGER PRIMARY KEY,
+	ActivityId INTEGER PRIMARY KEY AUTOINCREMENT, 
 	ProjectId INTEGER NOT NULL,
 	Name TEXT,
 	Description TEXT,
@@ -52,28 +59,24 @@ EOD
 	/**
 	 * Insert new record.
 	 *
-	 * @param \odTimeTracker\Model\ActivityEntity|array $data
-	 * @return \odTimeTracker\Model\ActivityEntity|boolean Returns FALSE if anything goes wrong.
+	 * @param EntityInterface $data
+	 * @return mixed Returns `false` or {@see \odTimeTracker\Model\ActivityEntity}.
 	 */
-	function insert($entity)
+	function insert(EntityInterface $entity)
 	{
-		if (!is_array($entity) && !($entity instanceof ActivityEntity)) {
-			return false;
-		}
-
-		$projectId = is_array($entity) ? $entity['ProjectId'] : $entity->getProjectId();
-		$name = is_array($entity) ? $entity['Name'] : $entity->getName();
-		$desc = is_array($entity) ? (array_key_exists('Description', $entity) ? $entity['Description'] : '') : $entity->getDescription();
-		$tags = is_array($entity) ? (array_key_exists('Tags', $entity) ? $entity['Tags'] : '') : $entity->getTags();
-		$started = is_array($entity) ? (array_key_exists('Started', $entity) ? $entity['Started'] : null) : $entity->getStarted();
+		$projectId = $entity->getProjectId();
+		$name = $entity->getName();
+		$desc = $entity->getDescription();
+		$tags = $entity->getTags();
+		$started = $entity->getStarted();
 		$startedObj = is_null($started) ? new \DateTime() : (($started instanceof \DateTime) ? $started : new \DateTime($started));
 		$startedStr = $startedObj->format(\DateTime::RFC3339);
-		$stopped = is_array($entity) ? (array_key_exists('Stopped', $entity) ? $entity['Stopped'] : null) : $entity->getStopped();
+		$stopped = $entity->getStopped();
 		$stoppedObj = is_null($stopped) ? null : (($stopped instanceof \DateTime) ? $stopped : new \DateTime($stopped));
 		$stoppedStr = ($stopped instanceof \DateTime) ? $stoppedObj->format(\DateTime::RFC3339) : '';
 
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 INSERT INTO $table (ProjectId, Name, Description, Tags, Started, Stopped) 
 VALUES ( :projectId, :name , :desc , :tags , :started , :stopped );
 EOD
@@ -85,33 +88,31 @@ EOD
 		$stmt->bindParam(':started', $startedStr, \PDO::PARAM_STR);
 		$stmt->bindParam(':stopped', $stoppedStr);
 		$res = $stmt->execute();
-		//var_dump($stmt->debugDumpParams());exit();
 
 		if ($res === false) {
 			return false;
 		}
 
 		return new ActivityEntity(array(
-			'ProjectId' => $this->db->getPdo()->lastInsertId(),
+			'ProjectId' => $this->pdo->lastInsertId(),
 			'Name' => $name,
 			'Description' => empty($description) ? null : $description,
 			'Tags' => empty($tags) ? null : $tags,
 			'Started' => $started,
 			'Stopped' => $stopped
 		));
-	} // end insert($entity)
+	} // end insert(EntityInterface $entity)
 
 	/**
 	 * Update record.
 	 *
-	 * @param \odTimeTracker\Model\ActivityEntity $entity
-	 * @return \odTimeTracker\Model\ActivityEntity|boolean Returns FALSE if anything goes wrong.
-	 * @todo Implement `ActivityMapper.update`!
+	 * @param EntityInterface $entity
+	 * @return mixed Returns either `FALSE` or {@see \odTimeTracker\Model\ActivityEntity}.
 	 */
-	function update($entity)
+	public function update(EntityInterface $entity)
 	{
 		// ...
-	} // end update($entity)
+	} // end update(EntityInterface $entity)
 
 	/**
 	 * Select all records.
@@ -122,7 +123,7 @@ EOD
 	function selectAll($limit = 0)
 	{
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
@@ -159,7 +160,7 @@ EOD
 	public function selectRecentActivities($limit)
 	{
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
@@ -192,12 +193,12 @@ EOD
 	/**
 	 * Select currently running activity.
 	 *
-	 * @return \odTimeTracker\Model\ActivityEntity|null
+	 * @return mixed Returns either `NULL` or {@see \odTimeTracker\Model\ActivityEntity}.
 	 */
 	public function selectRunningActivity()
 	{
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
@@ -235,7 +236,7 @@ EOD
 	public function selectActivitiesForInterval($dateFrom, $dateTo)
 	{
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
@@ -275,7 +276,7 @@ EOD
 	 * @param integer $projectId
 	 * @param string $description (Optional.)
 	 * @param string $tags (Optional.)
-	 * @return \odTimeTracker\Model\ActivityEntity|boolean
+	 * @return mixed Returns either `FALSE` or {@see \odTimeTracker\Model\ActivityEntity}.
 	 */
 	public function startActivity($name, $projectId, $description = '', $tags = '')
 	{
@@ -288,7 +289,7 @@ EOD
 		$startedStr = $started->format(\DateTime::RFC3339);
 
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 INSERT INTO $table (ProjectId, Name, Description, Tags, Started) 
 VALUES ( :projectId , :name , :description , :tags, :started );
 EOD
@@ -305,7 +306,7 @@ EOD
 		}
 
 		return new ActivityEntity(array(
-			'ActivityId' => $this->db->getPdo() ->lastInsertId(),
+			'ActivityId' => $this->pdo ->lastInsertId(),
 			'ProjectId' => $projectId,
 			'Name' => $name,
 			'Description' => empty($description) ? null : $description,
@@ -333,7 +334,7 @@ EOD
 		$activityId = $runningActivity->getActivityId();
 
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOD
 UPDATE $table 
 SET Stopped = :stopped 
 WHERE ActivityId = :activityId ;

@@ -32,68 +32,75 @@ class ProjectMapper extends AbstractMapper
 	function createSchema()
 	{
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$sql = <<<EOD
 CREATE TABLE IF NOT EXISTS `$table` (
-	ProjectId INTEGER PRIMARY KEY, 
+	ProjectId INTEGER PRIMARY KEY AUTOINCREMENT, 
 	Name TEXT,
 	Description TEXT,
 	Created TEXT NOT NULL
-)
-EOD
-		);
+);
+EOD;
 
-		return $stmt->execute();
+		return $this->pdo->prepare($sql)->execute();
 	} // end createSchema()
 
 	/**
 	 * Insert new record.
 	 *
-	 * @param ProjectEntity $data
-	 * @return mixed
+	 * @param EntityInterface $data
+	 * @return mixed Returns either `FALSE` or {@see \odTimeTracker\Model\ProjectEntity}.
 	 */
-	function insert(ProjectEntity $entity)
+	function insert(EntityInterface $entity)
 	{
-		$name = is_array($entity) ? $entity['Name'] : $entity->getName();
-		$desc = is_array($entity) ? $entity['Description'] : $entity->getDescription();
-		$created = is_array($entity) ? (array_key_exists('Created', $entity) ? $entity['Created'] : null) : $entity->getCreated();
-		$createdObj = is_null($created) ? new \DateTime() : (($created instanceof \DateTime) ? $created : new \DateTime($created));
-		$createdStr = $createdObj->format(\DateTime::RFC3339);
-
 		$table = self::TABLE_NAME;
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
+		$sql = <<<EOD
 INSERT INTO `$table` (`Name`, `Description`, `Created`) 
-VALUES ( :name , :desc , :created );
-EOD
-		);
-		$stmt->bindParam(':name', $name, \PDO::PARAM_STR);
-		$stmt->bindParam(':desc', $desc, \PDO::PARAM_STR);
-		$stmt->bindParam(':created', $createdStr, \PDO::PARAM_STR);
+VALUES ( :name , :desc , :created )
+EOD;
+
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->bindParam(':name', $entity->getName(), \PDO::PARAM_STR);
+		$stmt->bindParam(':desc', $entity->getDescription(), \PDO::PARAM_STR);
+		$stmt->bindParam(':created', $entity->getCreatedRfc3339(), \PDO::PARAM_STR);
 		$res = $stmt->execute();
-		//var_dump($stmt->debugDumpParams());exit();
 
 		if ($res === false) {
 			return false;
 		}
 
-		return new ProjectEntity(array(
-			'ProjectId' => $this->db->getPdo()->lastInsertId(),
-			'Name' => $name,
-			'Description' => empty($description) ? null : $description,
-			'Created' => $created
-		));
-	} // end insert($entity)
+		$entity->setId($this->pdo->lastInsertId());
+
+		return $entity;
+	} // end insert(EntityInterface $entity)
 
 	/**
 	 * Update record.
 	 *
-	 * @param ProjectEntity $entity
-	 * @return mixed
-	 * @todo Implement `ProjectMapper.update`!
+	 * @param EntityInterface $entity
+	 * @return mixed Returns either `FALSE` or {@see \odTimeTracker\Model\ProjectEntity}.
 	 */
-	function update(ProjectEntity $entity)
+	function update(EntityInterface $entity)
 	{
-		// ...
-	} // end update($entity)
+		$table = self::TABLE_NAME;
+		$sql = <<<EOD
+UPDATE `$table` 
+SET `Name` = :name , `Description` = :desc , `Created` = :created  
+WHERE `ProjectId` = :id 
+EOD;
+
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->bindParam(':id', $entity->getId(), \PDO::PARAM_INT);
+		$stmt->bindParam(':name', $entity->getName(), \PDO::PARAM_STR);
+		$stmt->bindParam(':desc', $entity->getDescription(), \PDO::PARAM_STR);
+		$stmt->bindParam(':created', $entity->getCreatedRfc3339(), \PDO::PARAM_STR);
+		$res = $stmt->execute();
+
+		if ($res === false) {
+			return false;
+		}
+
+		return $entity;
+	} // end update(EntityInterface $entity)
 
 	/**
 	 * Select all records.
@@ -105,7 +112,8 @@ EOD
 	{
 		$table = self::TABLE_NAME;
 		$limit = ($limit === 0 || is_null($limit)) ? '' : 'LIMIT ' . $limit;
-		$stmt = $this->db->getPdo()->prepare("SELECT * FROM `$table` WHERE 1 $limit;");
+		$sql = "SELECT * FROM `$table` WHERE 1 $limit;";
+		$stmt = $this->pdo->prepare($sql);
 		$res = $stmt->execute();
 
 		if ($res === false) {
