@@ -255,7 +255,7 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 		$tags = $this->getTags();
 
 		if (empty($tags)) {
-			return [];
+			return array();
 		}
 
 		return explode(',', $tags);
