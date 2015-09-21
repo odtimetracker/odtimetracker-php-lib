@@ -35,7 +35,7 @@ class ProjectEntityTest extends \PHPUnit_Framework_TestCase {
 			return $datetime;
 		}
 
-		if (empty((string) $datetime)) {
+		if (empty($datetime)) {
 			return null;
 		}
 
@@ -64,7 +64,7 @@ class ProjectEntityTest extends \PHPUnit_Framework_TestCase {
 			$this->assertEquals($data['ProjectId'], $entity->getProjectId());
 			$this->assertEquals($data['Name'], $entity->getName());
 			$this->assertEquals($data['Description'], $entity->getDescription());
-			
+
 			$this->assertEquals($this->getDateTime($data['Created']), $this->getDateTime($entity->getCreated()));
 		}
 	}
