@@ -252,11 +252,13 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	 */
 	public function getTagsAsArray()
 	{
-		if ($this->getTags() === null || empty($this->getTags())) {
+		$tags = $this->getTags();
+
+		if (empty($tags)) {
 			return [];
 		}
 
-		return explode(',', $this->getTags());
+		return explode(',', $tags);
 	} // end getTagsAsArray()
 
 	/**
