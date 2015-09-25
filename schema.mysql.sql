@@ -12,17 +12,18 @@ CREATE TABLE IF NOT EXISTS `Projects` (
     `Description` TEXT,
     `Created` TEXT NOT NULL,
     PRIMARY KEY (`ProjectId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 CREATE TABLE IF NOT EXISTS `Activities` (
     `ActivityId` INTEGER NOT NULL AUTO_INCREMENT, 
-    `ProjectId` INTEGER NOT NULL,
+    `ProjectId` INTEGER DEFAULT NULL,
     `Name` TEXT,
     `Description` TEXT,
     `Tags` TEXT,
     `Started` TEXT NOT NULL ,
     `Stopped` TEXT,
-    PRIMARY KEY (`ActivityId`),
-    FOREIGN KEY(`ProjectId`) REFERENCES `Projects`(`ProjectId`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+    PRIMARY KEY (`ActivityId`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+-- InnoDB
+-- FOREIGN KEY(`ProjectId`) REFERENCES `Projects`(`ProjectId`)

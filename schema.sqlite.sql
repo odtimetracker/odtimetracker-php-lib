@@ -15,11 +15,12 @@ CREATE TABLE IF NOT EXISTS `Projects` (
 
 CREATE TABLE IF NOT EXISTS `Activities` (
     `ActivityId` INTEGER PRIMARY KEY AUTOINCREMENT, 
-    `ProjectId` INTEGER NOT NULL,
+    `ProjectId` INTEGER DEFAULT NULL,
     `Name` TEXT,
     `Description` TEXT,
     `Tags` TEXT,
     `Started` TEXT NOT NULL,
-    `Stopped` TEXT NOT NULL DEFAULT '',
-    FOREIGN KEY(`ProjectId`) REFERENCES `Projects`(`ProjectId`)
+    `Stopped` TEXT NOT NULL DEFAULT ''
 );
+
+-- FOREIGN KEY(`ProjectId`) REFERENCES `Projects`(`ProjectId`)
