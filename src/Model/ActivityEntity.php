@@ -310,13 +310,13 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	 */
 	public function setStarted($val)
 	{
-		if (is_null($val) || empty($val)) {
-			$this->started = null;
-		} else if (($val instanceof \DateTime)) {
+		if (($val instanceof \DateTime)) {
 			$this->started = $val;
-		} else if (is_string($val)) {
+		}
+		else if (is_string($val) && !empty($val)) {
 			$this->started = new \DateTime($val);
-		} else {
+		}
+		else {
 			$this->started = null;
 		}
 
@@ -361,13 +361,13 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	 */
 	public function setStopped($val)
 	{
-		if (is_null($val) || empty($val)) {
-			$this->stopped = null;
-		} else if (($val instanceof \DateTime)) {
+		if (($val instanceof \DateTime)) {
 			$this->stopped = $val;
-		} else if (is_string($val)) {
+		}
+		else if (is_string($val) && !empty($val)) {
 			$this->stopped = new \DateTime($val);
-		} else {
+		}
+		else {
 			$this->stopped = null;
 		}
 
@@ -395,7 +395,7 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	 * activities that takes more than day.
 	 *
 	 * @return string
-	 * @todo Finish this (working only for short activities).
+	 * @todo Finish this (works only for short activities).
 	 */
 	public function getDurationFormatted()
 	{
@@ -462,6 +462,6 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 	 */
 	public function isRunning()
 	{
-		return !empty($this->stopped);
+		return empty($this->stopped);
 	} // end isRunning()
 } // End of ActivityEntity

@@ -186,11 +186,32 @@ class ActivityEntityTest extends \odTimeTrackerTest\AbstractModelTestCase
 		$this->assertEquals(30, $duration3->i);
 		$this->assertEquals(0, $duration3->s);
 
-		$activity3 = new \odTimeTracker\Model\ActivityEntity($activities[3]);
-		$duration3 = $activity3->getDuration();
-		$this->assertEquals(0, $duration3->h);
-		$this->assertEquals(4, $duration3->i);
-		$this->assertEquals(0, $duration3->s);
+		$activity4 = new \odTimeTracker\Model\ActivityEntity($activities[3]);
+		$duration4 = $activity4->getDuration();
+		$this->assertEquals(0, $duration4->h);
+		$this->assertEquals(4, $duration4->i);
+		$this->assertEquals(0, $duration4->s);
+
+		$activity5 = new \odTimeTracker\Model\ActivityEntity(array(
+			'Name' => 'Test activity',
+			'Started' => '2015-06-01 10:00:00+01:00',
+			'Stopped' => '2015-06-01 11:01:01+01:00'
+		));
+		$duration5 = $activity5->getDuration();
+		$this->assertEquals(1, $duration5->h);
+		$this->assertEquals(1, $duration5->i);
+		$this->assertEquals(1, $duration5->s);
+
+		$activity6 = new \odTimeTracker\Model\ActivityEntity(array(
+			'Name' => 'Test activity',
+			'Started' => '2015-06-02 10:00:00+01:00',
+			'Stopped' => '2015-06-03 11:01:01+01:00'
+		));
+		$duration6 = $activity6->getDuration();
+		$this->assertEquals(1, $duration6->d);
+		$this->assertEquals(1, $duration6->h);
+		$this->assertEquals(1, $duration6->i);
+		$this->assertEquals(1, $duration6->s);
 	}
 
 	/**
@@ -209,8 +230,29 @@ class ActivityEntityTest extends \odTimeTrackerTest\AbstractModelTestCase
 		$activity3 = new \odTimeTracker\Model\ActivityEntity($activities[2]);
 		$this->assertEquals('12 hours, 30 minutes', $activity3->getDurationFormatted());
 
-		$activity3 = new \odTimeTracker\Model\ActivityEntity($activities[3]);
-		$this->assertEquals('4 minutes', $activity3->getDurationFormatted());
+		$activity4 = new \odTimeTracker\Model\ActivityEntity($activities[3]);
+		$this->assertEquals('4 minutes', $activity4->getDurationFormatted());
+
+		$activity5 = new \odTimeTracker\Model\ActivityEntity(array(
+			'Name' => 'Test activity',
+			'Started' => '2015-06-01 10:00:00+01:00',
+			'Stopped' => '2015-06-01 11:01:01+01:00'
+		));
+		$this->assertEquals('One hour, one minute', $activity5->getDurationFormatted());
+
+		$activity6 = new \odTimeTracker\Model\ActivityEntity(array(
+			'Name' => 'Test activity',
+			'Started' => '2015-06-02 10:00:00+01:00',
+			'Stopped' => '2015-06-03 11:01:01+01:00'
+		));
+		$this->assertEquals('One day, one hour, one minute', $activity6->getDurationFormatted());
+
+		$activity7 = new \odTimeTracker\Model\ActivityEntity(array(
+			'Name' => 'Test activity',
+			'Started' => '2015-07-01 10:00:00+01:00',
+			'Stopped' => '2015-07-01 10:01:01+01:00'
+		));
+		$this->assertEquals('One minute', $activity7->getDurationFormatted());
 	}
 
 	/**
@@ -318,5 +360,67 @@ class ActivityEntityTest extends \odTimeTrackerTest\AbstractModelTestCase
 
 		$activity3 = new \odTimeTracker\Model\ActivityEntity($activities[2]);
 		$this->assertEquals('2011-10-06T19:45:00+01:00', $activity3->getStoppedRfc3339());
+	}
+
+	/**
+	 * @covers \odTimeTracker\Model\ActivityEntity::setStarted
+	 */
+	public function testSetStarted()
+	{
+		$activity = new \odTimeTracker\Model\ActivityEntity(array('Name' => 'Test activity'));
+
+		$activity->setStarted('2011-10-10T10:00:00+01:00');
+		$this->assertEquals(new \DateTime('2011-10-10T10:00:00+01:00'), $activity->getStarted());
+
+		$activity->setStarted(new \DateTime('2011-10-10T10:00:00+01:00'));
+		$this->assertEquals(new \DateTime('2011-10-10T10:00:00+01:00'), $activity->getStarted());
+
+		$activity->setStarted(null);
+		$this->assertNull($activity->getStarted());
+	}
+
+	/**
+	 * @covers \odTimeTracker\Model\ActivityEntity::__construct
+	 */
+	public function testConstructWithProject()
+	{
+		$activity = new \odTimeTracker\Model\ActivityEntity(array(
+			'ActivityId' => 1,
+			'ProjectId' => 1,
+			'Name' => 'Test activity',
+			'Description' => 'Description of the test activity.',
+			'Tags' => 'tag1,tag3',
+			'Started' => '2011-10-06T17:00:00+01:00',
+			'Stopped' => '2011-10-06T19:00:00+01:00',
+			'Project.ProjectId' => 1,
+			'Project.Name' => 'Test project #1',
+			'Project.Description' => 'The first test project.',
+			'Project.Created' => '2011-10-06T16:45:00+01:00'
+		));
+
+		$this->assertInstanceOf('\odTimeTracker\Model\ActivityEntity', $activity);
+		$this->assertEquals('Test activity', $activity->getName());
+		$this->assertInstanceOf('\odTimeTracker\Model\ProjectEntity', $activity->getProject());
+		$this->assertEquals('Test project #1', $activity->getProject()->getName());
+	}
+
+	/**
+	 * @covers \odTimeTracker\Model\ActivityEntity::isRunning
+	 */
+	public function testIsRunning()
+	{
+		$activity1 = new \odTimeTracker\Model\ActivityEntity(array(
+			'Name' => 'Test activity',
+			'Started' => '2015-06-02 10:00:00+01:00',
+			'Stopped' => '2015-06-03 11:01:01+01:00'
+		));
+		$this->assertFalse($activity1->isRunning());
+
+		$activity2 = new \odTimeTracker\Model\ActivityEntity(array(
+			'Name' => 'Test activity',
+			'Started' => '2015-06-03 10:00:00+01:00',
+			'Stopped' => null
+		));
+		$this->assertTrue($activity2->isRunning());
 	}
 }

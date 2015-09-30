@@ -27,6 +27,13 @@ class ActivityMapperTest extends \odTimeTrackerTest\AbstractModelTestCase
 
 		$results = $mapper->selectAll();
 		$this->assertEquals(7, count($results));
+
+		// Test failure
+		$res = $mapper->insert(new \odTimeTracker\Model\ActivityEntity(array('Name' => 'Test name')));
+		$this->assertFalse($res);
+
+		$results = $mapper->selectAll();
+		$this->assertEquals(7, count($results));
 	}
 
 	/**
@@ -234,6 +241,15 @@ class ActivityMapperTest extends \odTimeTrackerTest\AbstractModelTestCase
 		// 4) Now we should have still six activities
 		$activities = $mapper->selectAll();
 		$this->assertEquals(6, count($activities)); 
+
+		// 5) Start activity again - this should ends in failure
+		$res4 = $mapper->startActivity('Another new activity', 2);
+		$this->assertFalse($res4);
+
+		// 6) Start activity again - this should fails as the one before
+		//    (because it has no project).
+		$res5 = $mapper->startActivity('Yet another new activity', null);
+		$this->assertFalse($res5);
 	}
 
 	/**

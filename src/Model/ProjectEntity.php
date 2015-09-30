@@ -197,7 +197,7 @@ class ProjectEntity implements \odTimeTracker\Model\EntityInterface
 		if (($val instanceof \DateTime)) {
 			$this->created = $val;
 		}
-		else if (is_string($val)) {
+		else if (is_string($val) && !empty($val)) {
 			$this->created = new \DateTime($val);
 		}
 		else {

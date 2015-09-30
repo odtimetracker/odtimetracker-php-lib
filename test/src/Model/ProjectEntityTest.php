@@ -144,4 +144,21 @@ class ProjectEntityTest extends \odTimeTrackerTest\AbstractModelTestCase
 		$project3 = new \odTimeTracker\Model\ProjectEntity($projects[4]);
 		$this->assertEquals('2011-10-10T10:00:00+01:00', $project3->getCreatedRfc3339());
 	}
+
+	/**
+	 * @covers \odTimeTracker\Model\ProjectEntity::setCreated
+	 */
+	public function testSetCreated()
+	{
+		$project = new \odTimeTracker\Model\ProjectEntity(array('Name' => 'Test project'));
+
+		$project->setCreated('2011-10-10T10:00:00+01:00');
+		$this->assertEquals(new \DateTime('2011-10-10T10:00:00+01:00'), $project->getCreated());
+
+		$project->setCreated(new \DateTime('2011-10-10T10:00:00+01:00'));
+		$this->assertEquals(new \DateTime('2011-10-10T10:00:00+01:00'), $project->getCreated());
+
+		$project->setCreated(null);
+		$this->assertNull($project->getCreated());
+	}
 }

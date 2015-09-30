@@ -27,6 +27,13 @@ class ProjectMapperTest extends \odTimeTrackerTest\AbstractModelTestCase
 
 		$results = $mapper->selectAll();
 		$this->assertEquals(7, count($results));
+
+		// Test failure
+		$res = $mapper->insert(new \odTimeTracker\Model\ProjectEntity(array('Name' => 'Test name')));
+		$this->assertFalse($res);
+
+		$results = $mapper->selectAll();
+		$this->assertEquals(7, count($results));
 	}
 
 	/**
