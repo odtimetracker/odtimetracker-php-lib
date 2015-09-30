@@ -54,7 +54,7 @@ EOT;
 		$stmt->bindParam(':created', $entity->getCreatedRfc3339(), \PDO::PARAM_STR);
 		$res = $stmt->execute();
 
-		if ($res === false) {
+		if ($res === false || $stmt->rowCount() !== 1) {
 			return false;
 		}
 

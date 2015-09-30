@@ -110,18 +110,13 @@ abstract class AbstractMapper implements MapperInterface
 	 */
 	public function deleteById($id)
 	{
-		$entityId = intval($id);
-
-		if ($entityId == 0) {
-			return false;
-		}
-
 		$sql = "DELETE FROM `$this->tableName` WHERE `$this->pkColName` = :entityId ";
 
 		$stmt = $this->pdo->prepare($sql);
-		$stmt->bindParam(':entityId', $entityId, \PDO::PARAM_INT);
+		$stmt->bindParam(':entityId', intval($id), \PDO::PARAM_INT);
+		$res = $stmt->execute();
 
-		return $stmt->execute();
+		return ($res !== false && $stmt->rowCount() === 1);
 	} // end deleteById($id)
 
 	/**

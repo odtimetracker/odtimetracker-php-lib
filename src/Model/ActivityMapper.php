@@ -68,12 +68,13 @@ EOT
 		$stmt->bindParam(':stopped', $stoppedStr);
 		$res = $stmt->execute();
 
-		if ($res === false) {
+		if ($res === false || $stmt->rowCount() !== 1) {
 			return false;
 		}
 
 		return $this->prepareEntity(array(
-			'ProjectId' => $this->pdo->lastInsertId(),
+			'ActivityId' => $this->pdo->lastInsertId(),
+			'ProjectId' => $projectId,
 			'Name' => $name,
 			'Description' => empty($description) ? null : $description,
 			'Tags' => empty($tags) ? null : $tags,
@@ -90,7 +91,33 @@ EOT
 	 */
 	public function update(EntityInterface $entity)
 	{
-		throw new \Exception('Not implemented yet!');
+		$sql = <<<EOT
+UPDATE `$this->tableName` 
+SET 
+	`ProjectId` = :projectId , 
+	`Name` = :name , 
+	`Description` = :description , 
+	`Tags` = :tags , 
+	`Started` = :started , 
+	`Stopped` = :stopped 
+WHERE `ActivityId` = :id 
+EOT;
+
+		$stmt = $this->pdo->prepare($sql);
+		$stmt->bindParam(':id', $entity->getActivityId(), \PDO::PARAM_INT);
+		$stmt->bindParam(':projectId', $entity->getProjectId(), \PDO::PARAM_INT);
+		$stmt->bindParam(':name', $entity->getName(), \PDO::PARAM_STR);
+		$stmt->bindParam(':description', $entity->getDescription(), \PDO::PARAM_STR);
+		$stmt->bindParam(':tags', $entity->getTags(), \PDO::PARAM_STR);
+		$stmt->bindParam(':started', $entity->getStartedRfc3339(), \PDO::PARAM_STR);
+		$stmt->bindParam(':stopped', $entity->getStoppedRfc3339(), \PDO::PARAM_STR);
+		$res = $stmt->execute();
+
+		if ($res === false || $stmt->rowCount() !== 1) {
+			return false;
+		}
+
+		return $entity;
 	} // end update(EntityInterface $entity)
 
 	/**
@@ -275,7 +302,7 @@ EOT
 		$stmt->bindParam(':started', $startedStr, \PDO::PARAM_STR);
 		$res = $stmt->execute();
 
-		if ($res === false) {
+		if ($res === false || $stmt->rowCount() !== 1) {
 			return false;
 		}
 
