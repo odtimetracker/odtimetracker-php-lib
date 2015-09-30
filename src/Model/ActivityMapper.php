@@ -25,29 +25,40 @@ class ActivityMapper extends AbstractMapper
 	const PK_COL_NAME = 'ActivityId';
 
 	/**
+	 * Constructor.
+	 *
+	 * @param \PDO $pdo
+	 * @return void
+	 */
+	public function __construct(\PDO $pdo)
+	{
+		parent::__construct($pdo, self::TABLE_NAME, self::PK_COL_NAME);
+	} // end __construct(\PDO $pdo)
+
+	/**
 	 * Insert new record.
 	 *
 	 * @param EntityInterface $data
 	 * @return mixed Returns `false` or {@see \odTimeTracker\Model\ActivityEntity}.
 	 */
-	function insert(EntityInterface $entity)
+	public function insert(EntityInterface $entity)
 	{
 		$projectId = $entity->getProjectId();
 		$name = $entity->getName();
 		$desc = $entity->getDescription();
 		$tags = $entity->getTags();
 		$started = $entity->getStarted();
-		$startedObj = is_null($started) ? new \DateTime() : (($started instanceof \DateTime) ? $started : new \DateTime($started));
+		$startedObj = is_null($started) ? new \DateTime() : $started;
 		$startedStr = $startedObj->format(\DateTime::RFC3339);
 		$stopped = $entity->getStopped();
 		$stoppedObj = is_null($stopped) ? null : (($stopped instanceof \DateTime) ? $stopped : new \DateTime($stopped));
 		$stoppedStr = ($stopped instanceof \DateTime) ? $stoppedObj->format(\DateTime::RFC3339) : '';
 
 		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOT
 INSERT INTO $table (ProjectId, Name, Description, Tags, Started, Stopped) 
 VALUES ( :projectId, :name , :desc , :tags , :started , :stopped );
-EOD
+EOT
 		);
 		$stmt->bindParam(':projectId', $projectId, \PDO::PARAM_INT);
 		$stmt->bindParam(':name', $name, \PDO::PARAM_STR);
@@ -61,7 +72,7 @@ EOD
 			return false;
 		}
 
-		return new ActivityEntity(array(
+		return $this->prepareEntity(array(
 			'ProjectId' => $this->pdo->lastInsertId(),
 			'Name' => $name,
 			'Description' => empty($description) ? null : $description,
@@ -79,7 +90,7 @@ EOD
 	 */
 	public function update(EntityInterface $entity)
 	{
-		// ...
+		throw new \Exception('Not implemented yet!');
 	} // end update(EntityInterface $entity)
 
 	/**
@@ -88,20 +99,19 @@ EOD
 	 * @param integer $limit (Optional.)
 	 * @return array Returns array of {@see \odTimeTracker\Model\ActivityEntity}.
 	 */
-	function selectAll($limit = 0)
+	public function selectAll($limit = 0)
 	{
-		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOT
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
 	t2.Name AS "Project.Name",
 	t2.Description AS "Project.Description",
 	t2.Created AS "Project.Created"   
-FROM $table AS t1 
+FROM `$this->tableName` AS t1 
 LEFT JOIN Projects AS t2 ON t1.ProjectId = t2.ProjectId 
 ORDER BY t1.Started DESC ;
-EOD
+EOT
 		);
 		$res = $stmt->execute();
 
@@ -113,7 +123,7 @@ EOD
 
 		$ret = array();
 		foreach ($rows as $row) {
-			array_push($ret, new ActivityEntity($row));
+			array_push($ret, $this->prepareEntity($row));
 		}
 
 		return $ret;
@@ -127,19 +137,18 @@ EOD
 	 */
 	public function selectRecentActivities($limit)
 	{
-		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOT
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
 	t2.Name AS "Project.Name",
 	t2.Description AS "Project.Description",
 	t2.Created AS "Project.Created"
-FROM $table AS t1 
+FROM `$this->tableName` AS t1 
 LEFT JOIN Projects AS t2 ON t1.ProjectId = t2.ProjectId 
 ORDER BY t1.Started DESC 
 LIMIT :limit ;
-EOD
+EOT
 		);
 		$stmt->bindParam(':limit', $limit, \PDO::PARAM_INT);
 		$res = $stmt->execute();
@@ -152,7 +161,7 @@ EOD
 
 		$ret = array();
 		foreach ($rows as $row) {
-			array_push($ret, new ActivityEntity($row));
+			array_push($ret, $this->prepareEntity($row));
 		}
 
 		return $ret;
@@ -165,19 +174,18 @@ EOD
 	 */
 	public function selectRunningActivity()
 	{
-		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOT
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
 	t2.Name AS "Project.Name",
 	t2.Description AS "Project.Description",
 	t2.Created AS "Project.Created"
-FROM $table AS t1 
+FROM `$this->tableName` AS t1 
 LEFT JOIN Projects AS t2 ON t1.ProjectId = t2.ProjectId 
 WHERE t1.Stopped IS NULL OR t1.Stopped = '' 
 LIMIT 1 ;
-EOD
+EOT
 		);
 		$res = $stmt->execute();
 
@@ -191,7 +199,7 @@ EOD
 			return null;
 		}
 
-		return new ActivityEntity($row);
+		return $this->prepareEntity($row);
 	} // end selectRunningActivity()
 
 	/**
@@ -203,19 +211,18 @@ EOD
 	 */
 	public function selectActivitiesForInterval($dateFrom, $dateTo)
 	{
-		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
+		$stmt = $this->pdo->prepare(<<<EOT
 SELECT 
 	t1.*,
 	t2.ProjectId AS "Project.ProjectId",
 	t2.Name AS "Project.Name",
 	t2.Description AS "Project.Description",
 	t2.Created AS "Project.Created"
-FROM $table AS t1 
+FROM `$this->tableName` AS t1 
 LEFT JOIN Projects AS t2 ON t1.ProjectId = t2.ProjectId 
 WHERE t1.Started > :dateFrom AND t1.Started < :dateTo  
 ORDER BY t1.Started DESC ;
-EOD
+EOT
 		);
 		$stmt->bindParam(':dateFrom', $dateFrom, \PDO::PARAM_STR);
 		$stmt->bindParam(':dateTo', $dateTo, \PDO::PARAM_STR);
@@ -229,7 +236,7 @@ EOD
 
 		$ret = array();
 		foreach ($rows as $row) {
-			array_push($ret, new ActivityEntity($row));
+			array_push($ret, $this->prepareEntity($row));
 		}
 
 		return $ret;
@@ -256,11 +263,10 @@ EOD
 		$started = new \DateTime();
 		$startedStr = $started->format(\DateTime::RFC3339);
 
-		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
-INSERT INTO $table (ProjectId, Name, Description, Tags, Started) 
+		$stmt = $this->pdo->prepare(<<<EOT
+INSERT INTO `$this->tableName` (ProjectId, Name, Description, Tags, Started) 
 VALUES ( :projectId , :name , :description , :tags, :started );
-EOD
+EOT
 		);
 		$stmt->bindParam(':projectId', $projectId, \PDO::PARAM_INT);
 		$stmt->bindParam(':name', $name, \PDO::PARAM_STR);
@@ -273,8 +279,8 @@ EOD
 			return false;
 		}
 
-		return new ActivityEntity(array(
-			'ActivityId' => $this->pdo ->lastInsertId(),
+		return $this->prepareEntity(array(
+			'ActivityId' => $this->pdo->lastInsertId(),
 			'ProjectId' => $projectId,
 			'Name' => $name,
 			'Description' => empty($description) ? null : $description,
@@ -301,12 +307,8 @@ EOD
 		$nowStr = $nowObj->format(\DateTime::RFC3339);
 		$activityId = $runningActivity->getActivityId();
 
-		$table = self::TABLE_NAME;
-		$stmt = $this->pdo->prepare(<<<EOD
-UPDATE $table 
-SET Stopped = :stopped 
-WHERE ActivityId = :activityId ;
-EOD
+		$stmt = $this->pdo->prepare(
+			"UPDATE `$this->tableName` SET `Stopped` = :stopped WHERE `ActivityId` = :activityId "
 		);
 		$stmt->bindParam(':stopped', $nowStr, \PDO::PARAM_STR);
 		$stmt->bindParam(':activityId', $activityId, \PDO::PARAM_INT);
@@ -314,4 +316,14 @@ EOD
 
 		return $res;
 	} // end stopRunningActivity()
+
+	/**
+	 * @internal
+	 * @param array $data
+	 * @return ActivityEntity
+	 */
+	protected function prepareEntity($data)
+	{
+		return new ActivityEntity($data);
+	} // end prepareEntity($data)
 } // End of ActivityMapper

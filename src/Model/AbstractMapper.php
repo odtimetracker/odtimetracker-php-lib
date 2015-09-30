@@ -20,14 +20,26 @@ abstract class AbstractMapper implements MapperInterface
 	protected $pdo;
 
 	/**
+	 * @var string $tableName
+	 */
+	protected $tableName;
+
+	/**
+	 * @var string $pkColName
+	 */
+	protected $pkColName;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param \PDO $pdo
 	 * @return void
 	 */
-	public function __construct(\PDO $pdo)
+	public function __construct(\PDO $pdo, $tableName, $pkColName)
 	{
 		$this->pdo = $pdo;
+		$this->tableName = $tableName;
+		$this->pkColName = $pkColName;
 	} // end __construct(\PDO $pdo)
 
 	/**
@@ -37,6 +49,31 @@ abstract class AbstractMapper implements MapperInterface
 	 * @return array Returns array of {@see \odTimeTracker\Model\EntityInterface}.
 	 */
 	abstract function selectAll($limit = 0);
+
+	/**
+	 * Select entity by its ID.
+	 *
+	 * @param integer $id
+	 * @return EntityInterface|null
+	 */
+	public function selectById($id)
+	{
+		$sql = "SELECT * FROM `$this->tableName` WHERE `$this->pkColName` = %d ";
+		$stmt = $this->pdo->prepare(sprintf($sql, $id));
+		$res = $stmt->execute();
+
+		if ($res === false) {
+			return null;
+		}
+
+		$rows = $stmt->fetchAll();
+
+		if (count($rows) !== 1) {
+			return null;
+		}
+
+		return $this->prepareEntity($rows[0]);
+	} // end selectById($id)
 
 	/**
 	 * Insert new record.
@@ -73,20 +110,24 @@ abstract class AbstractMapper implements MapperInterface
 	 */
 	public function deleteById($id)
 	{
-		$entityId = intval($entity);
+		$entityId = intval($id);
 
 		if ($entityId == 0) {
 			return false;
 		}
 
-		$stmt = $this->db->getPdo()->prepare(<<<EOD
-DELETE FROM `:table` WHERE `:pkcolname` = :entityId LIMIT 1;
-EOD
-		);
-		$stmt->bindParam(':table', self::TABLE_NAME);
-		$stmt->bindParam(':pkcolname', self::PK_COL_NAME);
+		$sql = "DELETE FROM `$this->tableName` WHERE `$this->pkColName` = :entityId ";
+
+		$stmt = $this->pdo->prepare($sql);
 		$stmt->bindParam(':entityId', $entityId, \PDO::PARAM_INT);
 
 		return $stmt->execute();
 	} // end deleteById($id)
+
+	/**
+	 * @internal
+	 * @param array $data
+	 * @return EntityInterface
+	 */
+	abstract protected function prepareEntity($data);
 } // End of AbstractMapper

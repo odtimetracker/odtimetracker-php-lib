@@ -25,22 +25,32 @@ class ProjectMapper extends AbstractMapper
 	const PK_COL_NAME = 'ProjectId';
 
 	/**
+	 * Constructor.
+	 *
+	 * @param \PDO $pdo
+	 * @return void
+	 */
+	public function __construct(\PDO $pdo)
+	{
+		parent::__construct($pdo, self::TABLE_NAME, self::PK_COL_NAME);
+	} // end __construct(\PDO $pdo)
+
+	/**
 	 * Insert new record.
 	 *
 	 * @param EntityInterface $data
 	 * @return mixed Returns either `FALSE` or {@see \odTimeTracker\Model\ProjectEntity}.
 	 */
-	function insert(EntityInterface $entity)
+	public function insert(EntityInterface $entity)
 	{
-		$table = self::TABLE_NAME;
-		$sql = <<<EOD
-INSERT INTO `$table` (`Name`, `Description`, `Created`) 
-VALUES ( :name , :desc , :created )
-EOD;
+		$sql = <<<EOT
+INSERT INTO `$this->tableName` (`Name`, `Description`, `Created`) 
+VALUES ( :name , :description , :created )
+EOT;
 
 		$stmt = $this->pdo->prepare($sql);
 		$stmt->bindParam(':name', $entity->getName(), \PDO::PARAM_STR);
-		$stmt->bindParam(':desc', $entity->getDescription(), \PDO::PARAM_STR);
+		$stmt->bindParam(':description', $entity->getDescription(), \PDO::PARAM_STR);
 		$stmt->bindParam(':created', $entity->getCreatedRfc3339(), \PDO::PARAM_STR);
 		$res = $stmt->execute();
 
@@ -48,7 +58,7 @@ EOD;
 			return false;
 		}
 
-		$entity->setId($this->pdo->lastInsertId());
+		$entity->setProjectId($this->pdo->lastInsertId());
 
 		return $entity;
 	} // end insert(EntityInterface $entity)
@@ -59,23 +69,25 @@ EOD;
 	 * @param EntityInterface $entity
 	 * @return mixed Returns either `FALSE` or {@see \odTimeTracker\Model\ProjectEntity}.
 	 */
-	function update(EntityInterface $entity)
+	public function update(EntityInterface $entity)
 	{
-		$table = self::TABLE_NAME;
-		$sql = <<<EOD
-UPDATE `$table` 
-SET `Name` = :name , `Description` = :desc , `Created` = :created  
+		$sql = <<<EOT
+UPDATE `$this->tableName` 
+SET 
+	`Name` = :name , 
+	`Description` = :description , 
+	`Created` = :created  
 WHERE `ProjectId` = :id 
-EOD;
+EOT;
 
 		$stmt = $this->pdo->prepare($sql);
-		$stmt->bindParam(':id', $entity->getId(), \PDO::PARAM_INT);
+		$stmt->bindParam(':id', $entity->getProjectId(), \PDO::PARAM_INT);
 		$stmt->bindParam(':name', $entity->getName(), \PDO::PARAM_STR);
-		$stmt->bindParam(':desc', $entity->getDescription(), \PDO::PARAM_STR);
+		$stmt->bindParam(':description', $entity->getDescription(), \PDO::PARAM_STR);
 		$stmt->bindParam(':created', $entity->getCreatedRfc3339(), \PDO::PARAM_STR);
 		$res = $stmt->execute();
 
-		if ($res === false) {
+		if ($res === false || $stmt->rowCount() !== 1) {
 			return false;
 		}
 
@@ -88,12 +100,11 @@ EOD;
 	 * @param integer $limit (Optional.)
 	 * @return array Returns array of {@see \odTimeTracker\Model\ProjectEntity}.
 	 */
-	function selectAll($limit = 0)
+	public function selectAll($limit = 0)
 	{
-		$table = self::TABLE_NAME;
 		$limit = ($limit === 0 || is_null($limit)) ? '' : 'LIMIT ' . $limit;
-		$sql = "SELECT * FROM `$table` WHERE 1 $limit;";
-		$stmt = $this->pdo->prepare($sql);
+		$sql = "SELECT * FROM `$this->tableName` WHERE 1 %s ";
+		$stmt = $this->pdo->prepare(sprintf($sql, $limit));
 		$res = $stmt->execute();
 
 		if ($res === false) {
@@ -104,9 +115,19 @@ EOD;
 		$ret = array();
 
 		foreach ($rows as $row) {
-			array_push($ret, new ProjectEntity($row));
+			array_push($ret, $this->prepareEntity($row));
 		}
 
 		return $ret;
 	} // end selectAll($limit = 0)
+
+	/**
+	 * @internal
+	 * @param array $data
+	 * @return ProjectEntity
+	 */
+	protected function prepareEntity($data)
+	{
+		return new ProjectEntity($data);
+	} // end prepareEntity($data)
 } // End of ProjectMapper

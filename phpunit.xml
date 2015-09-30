@@ -17,12 +17,6 @@
          stopOnRisky="false" 
          verbose="false"
          bootstrap="test/bootstrap.php">
-    <!-- -->
-    <!-- printerClass="PHPUnit_TextUI_ResultPrinter" -->
-    <!-- testSuiteLoaderClass="PHPUnit_Runner_StandardTestSuiteLoader" -->
-    <!-- bootstrap="test/bootstrap.php" -->
-    <!-- printerFile="/path/to/ResultPrinter.php" -->
-    <!-- testSuiteLoaderFile="/path/to/StandardTestSuiteLoader.php" -->
     <filter>
         <blacklist>
             <directory suffix=".php">test/src</directory>
@@ -42,6 +36,21 @@
         <log type="testdox-html" target="tmp/testdox.html"/>
         <log type="testdox-text" target="tmp/testdox.txt"/>
     </logging>
+    <php>
+        <!-- MySQL -->
+        <var name="DB_DSN" value="mysql:dbname=odtimetracker;host=localhost"/>
+        <var name="DB_USER" value="root"/>
+        <var name="DB_PASSWD" value="root"/>
+        <var name="DB_DBNAME" value="odtimetracker"/>
+        <var name="DB_TRUNCATE" value="true"/>
+        <!-- Sqlite 
+        <var name="DB_DSN" value="sqlite::memory:" />
+        <var name="DB_USER" value="root"/>
+        <var name="DB_PASSWD" value="root"/>
+        <var name="DB_DBNAME" value="odtimetracker"/>
+        <var name="DB_TRUNCATE" VALUE="false"/>
+        -->
+    </php>
     <testsuites>
         <testsuite name="odTimeTracker PHP Library Tests">
             <directory>test/src</directory>
