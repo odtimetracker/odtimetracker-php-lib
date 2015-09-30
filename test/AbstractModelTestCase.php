@@ -41,9 +41,25 @@ abstract class AbstractModelTestCase extends PHPUnit_Framework_TestCase
             );
 
             foreach ($tables as $table) {
-                self::$pdo->exec(sprintf('TRUNCATE `%s`;', $table));
-                self::$pdo->exec(sprintf('ALTER TABLE `%s` AUTO_INCREMENT = 1;', $table));
+                self::truncateTable($table);
             }
+        }
+    }
+
+    /**
+     * @internal
+     * @static
+     * @param string $tableName
+     * @return void
+     */
+    protected static function truncateTable($tableName)
+    {
+        if (strpos($GLOBALS['DB_DSN'], 'sqlite:') === 0) {
+            self::$pdo->exec("DELETE FROM `{$tableName}` ");
+            self::$pdo->exec("DELETE FROM `sqlite_sequence` WHERE `name` = '{$tableName}' ");
+        } else {
+            self::$pdo->exec("TRUNCATE `{$tableName}` ");
+            self::$pdo->exec("ALTER TABLE `{$tableName}` AUTO_INCREMENT = 1 ");
         }
     }
 

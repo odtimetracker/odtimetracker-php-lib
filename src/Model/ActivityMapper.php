@@ -56,7 +56,7 @@ class ActivityMapper extends AbstractMapper
 
 		$table = self::TABLE_NAME;
 		$stmt = $this->pdo->prepare(<<<EOT
-INSERT INTO $table (ProjectId, Name, Description, Tags, Started, Stopped) 
+INSERT INTO `$this->tableName` (ProjectId, Name, Description, Tags, Started, Stopped) 
 VALUES ( :projectId, :name , :desc , :tags , :started , :stopped );
 EOT
 		);

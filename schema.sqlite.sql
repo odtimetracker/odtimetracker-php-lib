@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `Projects` (
 
 CREATE TABLE IF NOT EXISTS `Activities` (
     `ActivityId` INTEGER PRIMARY KEY AUTOINCREMENT, 
-    `ProjectId` INTEGER DEFAULT NULL,
+    `ProjectId` INTEGER NOT NULL,
     `Name` TEXT,
     `Description` TEXT,
     `Tags` TEXT,
