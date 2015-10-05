@@ -32,4 +32,3 @@ Here is an example of `composer.json` file for project that is using __odtimetra
     }
 }
 ```
-
