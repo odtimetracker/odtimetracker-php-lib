@@ -4,3 +4,4 @@ tmp
 test/_src
 phpunit
 
+/nbproject/private/
