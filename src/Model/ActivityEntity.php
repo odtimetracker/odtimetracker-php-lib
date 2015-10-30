@@ -314,7 +314,13 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 			$this->started = $val;
 		}
 		else if (is_string($val) && !empty($val)) {
-			$this->started = new \DateTime($val);
+			try {
+				// There can be accidentaly exeption thrown whenever the given
+				// string is not valid date.
+				$this->started = new \DateTime($val);
+			} catch(\Exception $e) {
+				$this->started = null;
+			}
 		}
 		else {
 			$this->started = null;
@@ -365,7 +371,13 @@ class ActivityEntity implements \odTimeTracker\Model\EntityInterface
 			$this->stopped = $val;
 		}
 		else if (is_string($val) && !empty($val)) {
-			$this->stopped = new \DateTime($val);
+			try {
+				// There can be accidentaly exeption thrown whenever the given
+				// string is not valid date.
+				$this->stopped = new \DateTime($val);
+			} catch(\Exception $e) {
+				$this->stopped = null;
+			}
 		}
 		else {
 			$this->stopped = null;

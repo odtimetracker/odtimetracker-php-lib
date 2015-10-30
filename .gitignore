@@ -1,7 +1,6 @@
-vendor
 composer.lock
-tmp
-test/_src
+composer.phar
 phpunit
+tmp
+vendor
 
-/nbproject/private/
