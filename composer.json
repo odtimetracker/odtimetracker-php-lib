@@ -1,5 +1,5 @@
 {
-    "name": "odTimeTracker/odtimetracker-php-lib",
+    "name": "odtimetracker/odtimetracker-php-lib",
     "description": "odTimeTracker PHP library.",
     "homepage": "https://github.com/odTimeTracker/odtimetracker-php-lib",
     "type": "library",
